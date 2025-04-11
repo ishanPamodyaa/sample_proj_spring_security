@@ -1,6 +1,7 @@
 package edu.icet.config;
 
 
+import edu.icet.filter.JWTFilter;
 import edu.icet.repository.UserRepository;
 import edu.icet.service.MyUserDetailService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
 @Configuration
@@ -24,6 +26,7 @@ public class SecurityConfig {
 
 //    private final MyUserDetailService myUserDetailService;
       private final UserRepository userRepository;
+      private final JWTFilter jwtFilter;
     @Bean
     public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception {
 
@@ -33,6 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req ->req
                 .requestMatchers("/login").permitAll()
                 .anyRequest().authenticated())
+               .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                .authenticationProvider(daoAuthenticationProvider())
                .httpBasic(Customizer.withDefaults()).build();
     }
