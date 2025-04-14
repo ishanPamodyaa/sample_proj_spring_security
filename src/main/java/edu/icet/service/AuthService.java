@@ -1,6 +1,8 @@
 package edu.icet.service;
 
 
+import edu.icet.dto.LoginRequestDTO;
+import edu.icet.dto.LoginResponseDTO;
 import edu.icet.entity.UserEntity;
 import edu.icet.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +30,19 @@ public class AuthService {
         newUser.setPassword(passwordEncoder.encode(userDetails.getPassword()));
 
         return userRepository.save(newUser);
+    }
+
+    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO){
+        Boolean userPresent = isAvailable(loginRequestDTO.getUsername());
+
+        if(!userPresent){
+            return new LoginResponseDTO(null , null , "User Not Found","Error")
+        }
+    }
+
+    private Boolean isAvailable(String userName){
+
+        return userRepository.findByUserName(userName).isPresent();
+
     }
 }
