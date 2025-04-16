@@ -34,28 +34,45 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal( HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         
-        final String path = request.getServletPath();
+//        final String path = request.getServletPath();
     
     // Skip JWT filter for login endpoint
-    if (path.equals("/login")) {
-        filterChain.doFilter(request, response);
-        return;
-    }
+//    if (path.equals("/login")) {
+//        filterChain.doFilter(request, response);
+//        return;
+//    }
         
         
         String authorization = request.getHeader("Authorization");
+        if(authorization==null){
+            filterChain.doFilter(request , response);
+            return;
+        
+        }
+
+
         System.out.println(authorization);
         if(!authorization.startsWith("Bearer ")) {
             filterChain.doFilter(request , response);
+            return;
         }
         String jwt_token = authorization.split(" ")[1];
 
         String username = jwtService.getUserName(jwt_token);
-        if(username==null){ filterChain.doFilter(request , response);}
+        if(username==null){ 
+            filterChain.doFilter(request , response);
+            return;
+        }
 
         UserEntity userData = userRepository.findByUserName(username).orElse(null);
-        if(userData == null){filterChain.doFilter(request,response);}
-        if(SecurityContextHolder.getContext().getAuthentication()!=null){filterChain.doFilter(request,response);}
+        if(userData == null){
+            filterChain.doFilter(request,response);
+            return;
+        }
+        if(SecurityContextHolder.getContext().getAuthentication()!=null){
+            filterChain.doFilter(request,response);
+            return;
+        }
 
         UserDetails userDetails = User.builder()
                 .username(userData.getUserName())
